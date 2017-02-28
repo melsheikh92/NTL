@@ -5,4 +5,16 @@ package com.nanodegree.mahmoud.movies.Main;
  */
 
 public interface MainPresenter {
+
+
+    void onResume();
+
+    void onItemClicked(int position);
+
+    void onDestroy();
+
+
+
+
+
 }
