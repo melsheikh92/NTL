@@ -22,8 +22,9 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
     TextView tv_date;
     ImageView iv_poster;
     TextView tv_details;
-    String myobject = null;
     String jsonString;
+    final  String KEY_OF_SELECTED_MOVIE="movieId";
+    final  String KEY_OF_KEEP_MOVIE="MYOBJ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +39,10 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
 
         Intent intent = getIntent();
         if (intent.hasExtra("movieId")) {
-            jsonString = intent.getStringExtra("movieId");
+            jsonString = intent.getStringExtra(   KEY_OF_SELECTED_MOVIE);
         } else {
             if (jsonString == null) {
-                savedInstanceState.getString("myobj");
+                savedInstanceState.getString(KEY_OF_KEEP_MOVIE);
             }
         }
 
@@ -69,7 +70,7 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
-        outState.putString("myobj", jsonString);
+        outState.putString(KEY_OF_KEEP_MOVIE, jsonString);
 
     }
 

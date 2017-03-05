@@ -29,7 +29,8 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     com.github.clans.fab.FloatingActionButton fab;
     static int mfiltertype = 0;
     RequestQueue queue;
-
+final  String KEY_OF_KEEP_FILTERING="mfilter";
+final  String KEY_OF_SELECTED_MOVIE="movieId";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,8 +38,8 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
         queue = Volley.newRequestQueue(getApplicationContext());
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey("mfilter")) {
-                mfiltertype = savedInstanceState.getInt("mfilter");
+            if (savedInstanceState.containsKey(KEY_OF_KEEP_FILTERING)) {
+                mfiltertype = savedInstanceState.getInt(KEY_OF_KEEP_FILTERING);
 
             }
 
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
 
     public void filterby(final int filterType) {
-        final String sorttype[] = {"Popularity", "Rate"};
+        final String sorttype[] = {"Most Popular", "High Rate"};
         AlertDialog.Builder alertdialogbuilder = new AlertDialog.Builder(MainActivity.this);
         alertdialogbuilder.setTitle("Sort By  ");
 
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
         Intent intent = new Intent(MainActivity.this, MovieActivity.class);
         try {
-            intent.putExtra("movieId", jr.get(position).toString());
+            intent.putExtra(KEY_OF_SELECTED_MOVIE, jr.get(position).toString());
             startActivity(intent);
 
         } catch (JSONException e) {
@@ -201,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
-        outState.putInt("mfilter", mfiltertype);
+        outState.putInt(KEY_OF_KEEP_FILTERING, mfiltertype);
     }
 
 }
