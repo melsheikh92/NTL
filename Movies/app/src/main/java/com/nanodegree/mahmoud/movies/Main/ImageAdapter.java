@@ -1,6 +1,8 @@
 package com.nanodegree.mahmoud.movies.Main;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,19 +11,35 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.nanodegree.mahmoud.movies.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.zip.Inflater;
+
 /**
  * Created by Mahmoud on 25/02/2017.
  */
 
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
+    LayoutInflater inflater;
+    JSONArray mArr;
 
-    public ImageAdapter(Context c) {
+    public ImageAdapter(Context c, JSONArray arr) {
         mContext = c;
+        mArr = arr;
+        inflater = (LayoutInflater) mContext.
+                getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+
     }
 
     public int getCount() {
-        return 20;
+        return mArr.length();
     }
 
     public Object getItem(int position) {
@@ -34,25 +52,23 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-       // ImageView imageView;
-        TextView tv;
-        if (convertView == null) {
-            // if it's not recycled, initialize some attributes
-           // imageView = new ImageView(mContext);
-            tv= new TextView(mContext);
-            tv.setText("mm");
-            tv.setLayoutParams(new GridView.LayoutParams(85, 85));
-            tv.setPadding(8, 8, 8, 8);
-//            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(8, 8, 8, 8);
-        } else {
-            //imageView = (ImageView) convertView;
-            tv= (TextView) convertView;
-        }
+        // ==ImageView imageView;
+        View view = inflater.inflate(R.layout.custom_movie, null);
+        TextView tv_rate = (TextView) view.findViewById(R.id.tv_movie_rate);
+        TextView tv_name = (TextView) view.findViewById(R.id.tv_movie_name);
+        ImageView iv_poster = (ImageView) view.findViewById(R.id.iv_movie);
 
-      //  imageView.setImageResource(mThumbIds[position]);
-        return tv;
+        try {
+            JSONObject mov = (JSONObject) mArr.get(position);
+            Glide.with(mContext).load("http://image.tmdb.org/t/p/w185/"+mov.getString("poster_path")).into(iv_poster);
+
+            tv_name.setText(mov.getString("title"));
+            tv_rate.setText(mov.getString("vote_average"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //  imageView.setImageResource(mThumbIds[position]);
+        return view;
     }
 
     // references to our images
