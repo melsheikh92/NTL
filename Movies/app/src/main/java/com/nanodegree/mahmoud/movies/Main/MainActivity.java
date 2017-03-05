@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,7 +26,6 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener {
     private ProgressBar progressBar;
     GridView gridview;
-    MainPresenter presenter;
     com.github.clans.fab.FloatingActionButton fab;
     static int mfiltertype = 0;
     RequestQueue queue;
@@ -35,6 +35,14 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         queue = Volley.newRequestQueue(getApplicationContext());
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("mfilter")) {
+                mfiltertype = savedInstanceState.getInt("mfilter");
+
+            }
+
+        }
         progressBar = (ProgressBar) findViewById(R.id.progress);
         gridview = (GridView) findViewById(R.id.gridview);
         gridview.setOnItemClickListener(this);
@@ -124,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                gridview.setAdapter(new ImageAdapter(getApplicationContext(), jr));
+                                gridview.setAdapter(new MoviesAdapter(getApplicationContext(), jr));
                                 hideProgress();
                             }
                         });
@@ -190,5 +198,10 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putInt("mfilter", mfiltertype);
+    }
 
 }

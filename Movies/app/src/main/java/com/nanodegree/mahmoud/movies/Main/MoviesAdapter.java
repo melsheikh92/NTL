@@ -24,12 +24,12 @@ import java.util.zip.Inflater;
  * Created by Mahmoud on 25/02/2017.
  */
 
-public class ImageAdapter extends BaseAdapter {
+public class MoviesAdapter extends BaseAdapter {
     private Context mContext;
     LayoutInflater inflater;
     JSONArray mArr;
 
-    public ImageAdapter(Context c, JSONArray arr) {
+    public MoviesAdapter(Context c, JSONArray arr) {
         mContext = c;
         mArr = arr;
         inflater = (LayoutInflater) mContext.
@@ -67,22 +67,11 @@ public class ImageAdapter extends BaseAdapter {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        //  imageView.setImageResource(mThumbIds[position]);
         return view;
     }
 
-    // references to our images
-//    private Integer[] mThumbIds = {
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7,
-//            R.drawable.sample_0, R.drawable.sample_1,
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7,
-//            R.drawable.sample_0, R.drawable.sample_1,
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7
-//    };
+
+
+
+
 }
