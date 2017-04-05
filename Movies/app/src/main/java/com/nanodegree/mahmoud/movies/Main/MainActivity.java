@@ -1,40 +1,68 @@
 package com.nanodegree.mahmoud.movies.Main;
 
 import android.app.AlertDialog;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.Loader;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.github.clans.fab.FloatingActionButton;
+import com.nanodegree.mahmoud.movies.Main.enteties.Movie;
 import com.nanodegree.mahmoud.movies.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener {
+import java.io.IOException;
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+
+public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
     private ProgressBar progressBar;
-    GridView gridview;
+   @BindView(R.id.gridview) GridView gridview;
+
+
     com.github.clans.fab.FloatingActionButton fab;
     static int mfiltertype = 0;
     RequestQueue queue;
-final  String KEY_OF_KEEP_FILTERING="mfilter";
-final  String KEY_OF_SELECTED_MOVIE="movieId";
+    Context mcontext;
+    final String KEY_OF_KEEP_FILTERING = "mfilter";
+    final String KEY_OF_SELECTED_MOVIE = "movieId";
+    final int Movies_Loader_key = 125689;
+    String url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
+    LoaderManager loadermanager;
+    Loader<ArrayList<Movie>> mloader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ButterKnife.bind(this);
+
+        mcontext = this;
         queue = Volley.newRequestQueue(getApplicationContext());
 
         if (savedInstanceState != null) {
@@ -45,7 +73,7 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
 
         }
         progressBar = (ProgressBar) findViewById(R.id.progress);
-        gridview = (GridView) findViewById(R.id.gridview);
+     //   gridview = (GridView) findViewById(R.id.gridview);
         gridview.setOnItemClickListener(this);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -57,15 +85,28 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
         });
         // presenter = new MainPresenterImp();
 
-        LongOperation longOperation = new LongOperation();
-        longOperation.execute();
+      /*  LongOperation longOperation = new LongOperation();
+        longOperation.execute();*/
 
+
+        loadermanager = getLoaderManager();
+
+        mloader = loadermanager.getLoader(Movies_Loader_key);
+        Bundle b = new Bundle();
+        if (mloader == null) {
+            mloader = loadermanager.initLoader(Movies_Loader_key, b, this);
+            Toast.makeText(mcontext, "initloader", Toast.LENGTH_LONG).show();
+        } else {
+
+            mloader = loadermanager.restartLoader(Movies_Loader_key, b, MainActivity.this);
+
+        }
 
     }
 
 
     public void filterby(final int filterType) {
-        final String sorttype[] = {"Most Popular", "High Rate"};
+        final String sorttype[] = {"Most Popular", "High Rate", "Favorite"};
         AlertDialog.Builder alertdialogbuilder = new AlertDialog.Builder(MainActivity.this);
         alertdialogbuilder.setTitle("Sort By  ");
 
@@ -75,9 +116,8 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
                 // Toast.makeText(getApplicationContext(), which + "", Toast.LENGTH_SHORT).show();
                 mfiltertype = which;
                 dialog.dismiss();
-                LongOperation longOperation = new LongOperation();
-                longOperation.execute();
 
+                mloader.forceLoad();
             }
         });
 
@@ -103,76 +143,130 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
 
     JSONArray jr;
 
+    @Override
+    public Loader<ArrayList<Movie>> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<ArrayList<Movie>>(mcontext) {
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                showProgress();
+                Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
+
+                forceLoad();
+
+            }
+
+            ArrayList<Movie> mymovies;
+
+
+            @Override
+            public ArrayList<Movie> loadInBackground() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mcontext, "background", Toast.LENGTH_SHORT).show();
+
+                    }
+
+                });
+                if (mfiltertype == 0) {
+                    url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
+                } else {
+                    url = "http://api.themoviedb.org/3/movie/top_rated?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
+
+                }
+                mymovies = new ArrayList<Movie>();
+
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+
+                Response response = null;
+                try {
+                    response = client.newCall(request).execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String mresponse = "";
+                try {
+                    mresponse = response.body().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // Log.d("checksss", mymovies.size() + "");
+                return ParseMovise(mresponse);
+
+            }
+        };
+    }
+
+    private ArrayList<Movie> ParseMovise(String s) {
+        ArrayList<Movie> cmovies = new ArrayList<Movie>();
+        JSONObject jObject = null;
+        try {
+            jObject = new JSONObject(s);
+            Log.d("response", s);
+
+            String movies = jObject.getString("results");
+            jr = new JSONArray(movies);
+            for (int i = 0; i < jr.length(); i++) {
+                JSONObject obj = (JSONObject) jr.get(i);
+                String title = obj.getString("title");
+                String poster = obj.getString("poster_path");
+                String release = obj.getString("release_date");
+                String id = obj.getString("id");
+                String avg = obj.getString("vote_average");
+                String overview = obj.getString("overview");
+                cmovies.add(new Movie(title, poster, release, id, avg, overview));
+
+            }
+
+//
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    hideProgress();
+                    AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
+                    alert.setTitle("Err");
+                    alert.setMessage("Error during fetching data .");
+                    alert.setPositiveButton("OK", null);
+                    alert.show();
+                }
+            });
+
+        }
+
+        return cmovies;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> data) {
+        Toast.makeText(mcontext, "loadfinish", Toast.LENGTH_SHORT).show();
+        gridview.setAdapter(new MoviesAdapter(getApplicationContext(), data));
+        hideProgress();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
+
+    }
+/*
     private class LongOperation extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-            showProgress();
+
         }
 
         @Override
         protected String doInBackground(String... params) {
 
-            String url = "";
-            if (mfiltertype == 0) {
-                url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
-            } else {
-                url = "http://api.themoviedb.org/3/movie/top_rated?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
-
-            }
-
-
-            StringRequest VolleyReq = new StringRequest(com.android.volley.Request.Method.GET, url, new com.android.volley.Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    JSONObject jObject = null;
-                    try {
-                        jObject = new JSONObject(s);
-
-                        String movies = jObject.getString("results");
-                        jr = new JSONArray(movies);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                gridview.setAdapter(new MoviesAdapter(getApplicationContext(), jr));
-                                hideProgress();
-                            }
-                        });
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                hideProgress();
-                                AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
-                                alert.setTitle("Err");
-                                alert.setMessage("Error during fetching data .");
-                                alert.setPositiveButton("OK", null);
-                                alert.show();
-                            }
-                        });
-
-                    }
-
-                }
-            }, new com.android.volley.Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    volleyError.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            hideProgress();
-                            AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
-                            alert.setTitle("Err");
-                            alert.setMessage("Error during fetching data .");
-                            alert.setPositiveButton("OK", null);
-                            alert.show();
-                        }
-                    });
-                }
-            });
-            queue.add(VolleyReq);
 
             return "";
         }
@@ -182,7 +276,7 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
 
         }
     }
-
+*/
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -203,6 +297,13 @@ final  String KEY_OF_SELECTED_MOVIE="movieId";
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
         outState.putInt(KEY_OF_KEEP_FILTERING, mfiltertype);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mloader = loadermanager.restartLoader(Movies_Loader_key, null, MainActivity.this);
+
     }
 
 }
