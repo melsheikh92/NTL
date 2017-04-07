@@ -1,5 +1,6 @@
 package com.nanodegree.mahmoud.movies.Main;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;

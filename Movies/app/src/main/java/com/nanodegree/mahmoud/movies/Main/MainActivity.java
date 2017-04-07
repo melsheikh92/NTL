@@ -41,9 +41,8 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
     private ProgressBar progressBar;
-   @BindView(R.id.gridview) GridView gridview;
-
-
+    @BindView(R.id.gridview)
+    GridView gridview;
     com.github.clans.fab.FloatingActionButton fab;
     static int mfiltertype = 0;
     RequestQueue queue;
@@ -54,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     String url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
     LoaderManager loadermanager;
     Loader<ArrayList<Movie>> mloader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
         }
         progressBar = (ProgressBar) findViewById(R.id.progress);
-     //   gridview = (GridView) findViewById(R.id.gridview);
+        //   gridview = (GridView) findViewById(R.id.gridview);
         gridview.setOnItemClickListener(this);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -83,14 +83,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
             }
         });
-        // presenter = new MainPresenterImp();
-
-      /*  LongOperation longOperation = new LongOperation();
-        longOperation.execute();*/
-
-
         loadermanager = getLoaderManager();
-
         mloader = loadermanager.getLoader(Movies_Loader_key);
         Bundle b = new Bundle();
         if (mloader == null) {
@@ -103,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
         }
 
     }
-
 
     public void filterby(final int filterType) {
         final String sorttype[] = {"Most Popular", "High Rate", "Favorite"};
