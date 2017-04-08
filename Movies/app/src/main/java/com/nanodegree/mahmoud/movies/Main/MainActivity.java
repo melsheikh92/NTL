@@ -53,8 +53,6 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     String url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
     LoaderManager loadermanager;
     Loader<ArrayList<Movie>> mloader;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,10 +113,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
 
         AlertDialog dialog = alertdialogbuilder.create();
-
         dialog.show();
-
-
     }
 
     @Override
@@ -144,13 +139,9 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 super.onStartLoading();
                 showProgress();
                 Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
-
                 forceLoad();
-
             }
-
             ArrayList<Movie> mymovies;
-
 
             @Override
             public ArrayList<Movie> loadInBackground() {
@@ -281,8 +272,6 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
@@ -295,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     protected void onResume() {
         super.onResume();
         mloader = loadermanager.restartLoader(Movies_Loader_key, null, MainActivity.this);
-
     }
 
 }
