@@ -14,7 +14,7 @@
             android:id="@+id/listview_videos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-></ListView>
+            android:padding="5dp"></ListView>
 
     </LinearLayout>
 

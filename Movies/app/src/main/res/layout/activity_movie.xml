@@ -80,7 +80,7 @@
                     android:id="@+id/btnvideo"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:text="video " />
+                    android:text="videos" />
             </LinearLayout>
 
         </LinearLayout>
@@ -112,7 +112,10 @@
                 android:id="@+id/tv_reviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/tv_review" />
+                android:text="@string/tv_review"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <ListView
                 android:id="@+id/listview_reviews"
