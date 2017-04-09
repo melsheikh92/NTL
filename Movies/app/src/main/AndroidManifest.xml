@@ -18,7 +18,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".Main.MovieActivity" />
-        <activity android:name=".Main.VideoActivity"></activity>
+        <activity android:name=".Main.VideoActivity" />
+
+        <provider
+            android:name=".Main.data.FavoriteProvider"
+            android:authorities="com.nanodegree.mahmoud.movies"
+            android:exported="false"></provider>
     </application>
 
 </manifest>

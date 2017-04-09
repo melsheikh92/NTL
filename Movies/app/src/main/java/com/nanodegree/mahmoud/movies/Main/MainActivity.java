@@ -41,7 +41,6 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
     private ProgressBar progressBar;
-    @BindView(R.id.gridview)
     GridView gridview;
     com.github.clans.fab.FloatingActionButton fab;
     static int mfiltertype = 0;
@@ -53,12 +52,11 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     String url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
     LoaderManager loadermanager;
     Loader<ArrayList<Movie>> mloader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ButterKnife.bind(this);
 
         mcontext = this;
         queue = Volley.newRequestQueue(getApplicationContext());
@@ -71,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
         }
         progressBar = (ProgressBar) findViewById(R.id.progress);
-        //   gridview = (GridView) findViewById(R.id.gridview);
+        gridview = (GridView) findViewById(R.id.gridview);
         gridview.setOnItemClickListener(this);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -141,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
                 forceLoad();
             }
+
             ArrayList<Movie> mymovies;
 
             @Override
@@ -197,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             String movies = jObject.getString("results");
             jr = new JSONArray(movies);
             for (int i = 0; i < jr.length(); i++) {
+
                 JSONObject obj = (JSONObject) jr.get(i);
                 String title = obj.getString("title");
                 String poster = obj.getString("poster_path");
