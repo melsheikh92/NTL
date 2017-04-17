@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -26,6 +27,7 @@ import com.github.clans.fab.FloatingActionButton;
 import com.nanodegree.mahmoud.movies.Main.data.FavoriteContract;
 import com.nanodegree.mahmoud.movies.Main.data.FavoriteProvider;
 import com.nanodegree.mahmoud.movies.Main.enteties.Movie;
+import com.nanodegree.mahmoud.movies.Main.utilit.ConnectionIssues;
 import com.nanodegree.mahmoud.movies.R;
 
 import org.json.JSONArray;
@@ -60,41 +62,46 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mcontext = this;
-        queue = Volley.newRequestQueue(getApplicationContext());
+        if (ConnectionIssues.isNetworkConnected(this)) {
+            setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_OF_KEEP_FILTERING)) {
-                mfiltertype = savedInstanceState.getInt(KEY_OF_KEEP_FILTERING);
+            mcontext = this;
+            queue = Volley.newRequestQueue(getApplicationContext());
 
-            }
+            if (savedInstanceState != null) {
+                if (savedInstanceState.containsKey(KEY_OF_KEEP_FILTERING)) {
+                    mfiltertype = savedInstanceState.getInt(KEY_OF_KEEP_FILTERING);
 
-        }
-        progressBar = (ProgressBar) findViewById(R.id.progress);
-        gridview = (GridView) findViewById(R.id.gridview);
-        gridview.setOnItemClickListener(this);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                filterby(mfiltertype);
+                }
 
             }
-        });
-        loadermanager = getLoaderManager();
-        mloader = loadermanager.getLoader(Movies_Loader_key);
-        Bundle b = new Bundle();
-        if (mloader == null) {
-            mloader = loadermanager.initLoader(Movies_Loader_key, b, this);
-            Toast.makeText(mcontext, "initloader", Toast.LENGTH_LONG).show();
-        } else {
+            progressBar = (ProgressBar) findViewById(R.id.progress);
+            gridview = (GridView) findViewById(R.id.gridview);
+            gridview.setOnItemClickListener(this);
+            fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    filterby(mfiltertype);
 
-            mloader = loadermanager.restartLoader(Movies_Loader_key, b, MainActivity.this);
+                }
+            });
+            loadermanager = getLoaderManager();
+            mloader = loadermanager.getLoader(Movies_Loader_key);
+            Bundle b = new Bundle();
+            if (mloader == null) {
+                mloader = loadermanager.initLoader(Movies_Loader_key, b, this);
+                Toast.makeText(mcontext, "initloader", Toast.LENGTH_LONG).show();
+            } else {
 
+                mloader = loadermanager.restartLoader(Movies_Loader_key, b, MainActivity.this);
+
+            }
+        }else{
+
+            setContentView(R.layout.noconnection_layout);
         }
-
     }
 
     public void filterby(final int filterType) {
@@ -340,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     protected void onResume() {
         super.onResume();
-        mloader = loadermanager.restartLoader(Movies_Loader_key, null, MainActivity.this);
+//        mloader = loadermanager.restartLoader(Movies_Loader_key, null, MainActivity.this);
     }
 
 }

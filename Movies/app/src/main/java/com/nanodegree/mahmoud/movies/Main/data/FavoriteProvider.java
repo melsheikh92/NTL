@@ -8,6 +8,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 
 public class FavoriteProvider extends ContentProvider {
