@@ -33,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -127,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     }
 
     JSONArray jr;
+    ArrayList<Movie> mMovies;
 
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, Bundle args) {
@@ -277,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> data) {
         Toast.makeText(mcontext, "loadfinish", Toast.LENGTH_SHORT).show();
+        mMovies = data;
         gridview.setAdapter(new MoviesAdapter(getApplicationContext(), data));
         hideProgress();
     }
@@ -309,11 +312,11 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        Intent intent = new Intent(MainActivity.this, MovieActivity.class);
-        intent.putExtra("type", (mfiltertype == 2) ? true : false);
+        //   intent.putExtra("type", (mfiltertype == 2) ? true : false);
 
         if (mfiltertype != 2) {
             try {
+                Intent intent = new Intent(MainActivity.this, MovieActivity.class);
                 intent.putExtra(KEY_OF_SELECTED_MOVIE, jr.get(position).toString());
                 startActivity(intent);
 
@@ -321,7 +324,9 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 e.printStackTrace();
             }
         } else {
-
+            Intent intent = new Intent(MainActivity.this, MovieFavActivity.class);
+            intent.putExtra("movie", mMovies.get(position));
+            startActivity(intent);
 
         }
     }

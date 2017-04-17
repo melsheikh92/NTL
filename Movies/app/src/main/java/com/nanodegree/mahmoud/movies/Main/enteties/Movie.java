@@ -1,10 +1,12 @@
 package com.nanodegree.mahmoud.movies.Main.enteties;
 
+import java.io.Serializable;
+
 /**
  * Created by Mahmoud on 04/03/2017.
  */
 
-public class Movie {
+public class Movie implements Serializable {
 
     public Movie(String title, String poster_path, String release_date, String id, String vote_average, String overview) {
         this.title = title;

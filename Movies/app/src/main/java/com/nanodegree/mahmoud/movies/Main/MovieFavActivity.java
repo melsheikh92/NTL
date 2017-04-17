@@ -6,7 +6,6 @@ import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
@@ -48,7 +47,7 @@ import okhttp3.Response;
 
 import static android.R.id.input;
 
-public class MovieActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Review>> {
+public class MovieFavActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Review>> {
     private static final int KEY_REVIEWS = 6;
     android.support.v7.widget.Toolbar toolbar;
     TextView tv_rate;
@@ -65,6 +64,7 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
     LoaderManager mloadermanager;
     Loader mloader;
     CheckBox star;
+    Movie mMovie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,42 +79,34 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
         lv_reviews = (ListView) findViewById(R.id.listview_reviews);
         btnvideo = (Button) findViewById(R.id.btnvideo);
         Intent intent = getIntent();
+        star.setChecked(true);
+
+        if (intent.hasExtra("movie")) {
+            mMovie = (Movie) intent.getSerializableExtra("movie");
 
 
-        if (intent.hasExtra("movieId")) {
-            jsonString = intent.getStringExtra(KEY_OF_SELECTED_MOVIE);
-        } else {
-            if (jsonString == null) {
-                savedInstanceState.getString(KEY_OF_KEEP_MOVIE);
+            try {
+                toolbar.setTitle(mMovie.getTitle());
+                setSupportActionBar(toolbar);
+                toolbar.setNavigationIcon(R.drawable.back);
+                toolbar.setNavigationOnClickListener(this);
+                Glide.with(this).load("http://image.tmdb.org/t/p/w185/" + mMovie.getPoster_path()).into(iv_poster);
+                MovieId = mMovie.getId();
+                tv_date.setText(mMovie.getRelease_date());
+                tv_rate.setText(mMovie.getVote_average());
+                tv_details.setText(mMovie.getOverview());
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
             }
         }
-
-
-        try {
-            JSONObject jObj = new JSONObject(jsonString);
-
-            toolbar.setTitle(jObj.getString("title"));
-            setSupportActionBar(toolbar);
-            toolbar.setNavigationIcon(R.drawable.back);
-            toolbar.setNavigationOnClickListener(this);
-            Glide.with(this).load("http://image.tmdb.org/t/p/w185/" + jObj.getString("poster_path")).into(iv_poster);
-            MovieId = jObj.getString("id");
-            tv_date.setText(jObj.getString("release_date"));
-            tv_rate.setText(jObj.getString("vote_average"));
-            tv_details.setText(jObj.getString("overview"));
-            star.setChecked(isExist(MovieId));
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-        }
-
         btnvideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(MovieActivity.this, VideoActivity.class);
+                Intent intent = new Intent(MovieFavActivity.this, VideoActivity.class);
                 intent.putExtra(KEY_SELECTED_MOVIE_ID, MovieId);
                 startActivity(intent);
             }
@@ -124,19 +116,18 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
             public void onClick(View v) {
                 if (star.isChecked()) {
                     try {
-                        JSONObject jObj = new JSONObject(jsonString);
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(FavoriteContract.FavEntry.KEY_ID, jObj.getString("id"));
-                        contentValues.put(FavoriteContract.FavEntry.KEY_NAME, jObj.getString("title"));
-                        contentValues.put(FavoriteContract.FavEntry.KEY_POSTER, jObj.getString("poster_path"));
-                        contentValues.put(FavoriteContract.FavEntry.KEY_RELEASE_DATE, jObj.getString("release_date"));
-                        contentValues.put(FavoriteContract.FavEntry.KEY_VOTE_AVG, jObj.getString("vote_average"));
-                        contentValues.put(FavoriteContract.FavEntry.KEY_OVERVIEW, jObj.getString("overview"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_ID, mMovie.getId());
+                        contentValues.put(FavoriteContract.FavEntry.KEY_NAME, mMovie.getTitle());
+                        contentValues.put(FavoriteContract.FavEntry.KEY_POSTER, mMovie.getPoster_path());
+                        contentValues.put(FavoriteContract.FavEntry.KEY_RELEASE_DATE, mMovie.getRelease_date());
+                        contentValues.put(FavoriteContract.FavEntry.KEY_VOTE_AVG, mMovie.getVote_average());
+                        contentValues.put(FavoriteContract.FavEntry.KEY_OVERVIEW, mMovie.getOverview());
                         Uri uri = getContentResolver().insert(FavoriteProvider.CONTENT_URI, contentValues);
                         if (uri != null) {
                             Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_LONG).show();
                         }
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     }
@@ -153,17 +144,6 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
 
         mloadermanager = getLoaderManager();
         mloader = mloadermanager.initLoader(KEY_REVIEWS, null, this);
-    }
-
-    private boolean isExist(String movieId) {
-        String selection = FavoriteContract.FavEntry.KEY_ID + " = '"
-                + MovieId + "'";
-
-        return getContentResolver().query(FavoriteProvider.CONTENT_URI,
-                null,
-                selection,
-                null,
-                null).getCount() > 0 ? true : false;
     }
 
     @Override

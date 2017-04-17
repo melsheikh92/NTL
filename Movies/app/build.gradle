@@ -28,6 +28,7 @@ dependencies {
 
 
     compile files('libs/volley.jar')
+
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.github.clans:fab:1.6.4'
@@ -35,8 +36,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
     compile 'com.afollestad:easyvideoplayer:0.3.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.code.gson:gson:2.6.2'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
-    compile 'com.google.code.gson:gson:2.6.2'
-
 }

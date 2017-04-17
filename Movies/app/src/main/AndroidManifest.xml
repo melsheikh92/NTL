@@ -23,7 +23,9 @@
         <provider
             android:name=".Main.data.FavoriteProvider"
             android:authorities="com.nanodegree.mahmoud.movies"
-            android:exported="false"></provider>
+            android:exported="false" />
+
+        <activity android:name=".Main.MovieFavActivity"></activity>
     </application>
 
 </manifest>
