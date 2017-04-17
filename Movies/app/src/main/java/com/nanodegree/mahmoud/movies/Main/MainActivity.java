@@ -347,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     protected void onResume() {
         super.onResume();
+//        mloader = loadermanager.restartLoader(Movies_Loader_key, null, MainActivity.this);
     }
 
 }
