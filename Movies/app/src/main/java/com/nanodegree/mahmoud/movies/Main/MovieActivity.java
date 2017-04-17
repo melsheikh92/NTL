@@ -3,10 +3,13 @@ package com.nanodegree.mahmoud.movies.Main;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.Uri;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ListPopupWindow;
@@ -14,12 +17,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.nanodegree.mahmoud.movies.Main.data.FavoriteContract;
+import com.nanodegree.mahmoud.movies.Main.data.FavoriteProvider;
 import com.nanodegree.mahmoud.movies.Main.enteties.Movie;
 import com.nanodegree.mahmoud.movies.Main.enteties.Review;
 import com.nanodegree.mahmoud.movies.R;
@@ -39,6 +45,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.R.id.input;
+
 public class MovieActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Review>> {
     private static final int KEY_REVIEWS = 6;
     android.support.v7.widget.Toolbar toolbar;
@@ -55,6 +63,7 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
     Button btnvideo;
     LoaderManager mloadermanager;
     Loader mloader;
+    CheckBox star;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +74,12 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
         tv_date = (TextView) findViewById(R.id.tv_date);
         tv_details = (TextView) findViewById(R.id.tv_details);
         iv_poster = (ImageView) findViewById(R.id.iv_poster);
-
+        star = (CheckBox) findViewById(R.id.star);
         lv_reviews = (ListView) findViewById(R.id.listview_reviews);
         btnvideo = (Button) findViewById(R.id.btnvideo);
         Intent intent = getIntent();
+        boolean x = intent.getBooleanExtra("type", false);
+        star.setChecked(x);
 
         if (intent.hasExtra("movieId")) {
             jsonString = intent.getStringExtra(KEY_OF_SELECTED_MOVIE);
@@ -77,6 +88,7 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
                 savedInstanceState.getString(KEY_OF_KEEP_MOVIE);
             }
         }
+
 
         try {
             JSONObject jObj = new JSONObject(jsonString);
@@ -104,10 +116,39 @@ public class MovieActivity extends AppCompatActivity implements View.OnClickList
                 Intent intent = new Intent(MovieActivity.this, VideoActivity.class);
                 intent.putExtra(KEY_SELECTED_MOVIE_ID, MovieId);
                 startActivity(intent);
-
-
             }
         });
+        star.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (star.isChecked()) {
+                    try {
+                        JSONObject jObj = new JSONObject(jsonString);
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(FavoriteContract.FavEntry.KEY_ID, jObj.getString("id"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_NAME, jObj.getString("title"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_POSTER, jObj.getString("poster_path"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_RELEASE_DATE, jObj.getString("release_date"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_VOTE_AVG, jObj.getString("vote_average"));
+                        contentValues.put(FavoriteContract.FavEntry.KEY_OVERVIEW, jObj.getString("overview"));
+                        Uri uri = getContentResolver().insert(FavoriteProvider.CONTENT_URI, contentValues);
+                        if (uri != null) {
+                            Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Uri uri = FavoriteProvider.CONTENT_URI;
+                    uri = uri.buildUpon().appendPath(MovieId).build();
+                    getContentResolver().delete(uri, null, null);
+
+                    finish();
+                }
+            }
+        });
+
 
         mloadermanager = getLoaderManager();
         mloader = mloadermanager.initLoader(KEY_REVIEWS, null, this);

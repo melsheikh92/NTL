@@ -9,7 +9,8 @@
         android:id="@+id/tv_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="TextView"
+        android:textSize="18sp" />
 
     <ProgressBar
         android:id="@+id/progressBar"

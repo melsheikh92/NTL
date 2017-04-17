@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.github.clans.fab.FloatingActionButton;
+import com.nanodegree.mahmoud.movies.Main.data.FavoriteContract;
+import com.nanodegree.mahmoud.movies.Main.data.FavoriteProvider;
 import com.nanodegree.mahmoud.movies.Main.enteties.Movie;
 import com.nanodegree.mahmoud.movies.R;
 
@@ -101,11 +104,10 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
         alertdialogbuilder.setSingleChoiceItems(sorttype, filterType, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Toast.makeText(getApplicationContext(), which + "", Toast.LENGTH_SHORT).show();
                 mfiltertype = which;
                 dialog.dismiss();
-
                 mloader.forceLoad();
+
             }
         });
 
@@ -117,13 +119,11 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     @Override
     public void showProgress() {
         progressBar.setVisibility(View.VISIBLE);
-        // gridview.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void hideProgress() {
         progressBar.setVisibility(View.INVISIBLE);
-        // gridview.setVisibility(View.VISIBLE);
     }
 
     JSONArray jr;
@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 showProgress();
                 Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
                 forceLoad();
+
             }
 
             ArrayList<Movie> mymovies;
@@ -152,38 +153,82 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                     }
 
                 });
-                if (mfiltertype == 0) {
-                    url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
-                } else {
-                    url = "http://api.themoviedb.org/3/movie/top_rated?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
-
-                }
                 mymovies = new ArrayList<Movie>();
 
-                OkHttpClient client = new OkHttpClient();
+                if (mfiltertype == 0) {
+                    url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
 
-                Request request = new Request.Builder()
-                        .url(url)
-                        .build();
-
-                Response response = null;
-                try {
-                    response = client.newCall(request).execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } else if (mfiltertype == 1) {
+                    url = "http://api.themoviedb.org/3/movie/top_rated?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
                 }
-                String mresponse = "";
-                try {
-                    mresponse = response.body().string();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                if (mfiltertype == 2) {
 
-                // Log.d("checksss", mymovies.size() + "");
-                return ParseMovise(mresponse);
+                    try {
+                        return parseFavCursor(getContentResolver().query(FavoriteProvider.CONTENT_URI,
+                                null,
+                                null,
+                                null,
+                                null));
+
+                    } catch (Exception e) {
+                        Log.e("vvg", "Failed to asynchronously load data.");
+                        e.printStackTrace();
+                        return null;
+                    }
+
+                } else {
+
+                    OkHttpClient client = new OkHttpClient();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .build();
+
+                    Response response = null;
+                    try {
+                        response = client.newCall(request).execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    String mresponse = "";
+                    try {
+                        mresponse = response.body().string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Log.d("checksss", mymovies.size() + "");
+                    return ParseMovise(mresponse);
+                }
 
             }
         };
+    }
+
+    private ArrayList<Movie> parseFavCursor(Cursor query) {
+        jr = null;
+        ArrayList<Movie> movies = new ArrayList<Movie>();
+        while (query.moveToNext()) {
+            // movies.add(new Movie());
+            Movie m = new Movie();
+            m.setId(query.getString(0));
+            m.setTitle(query.getString(1));
+            m.setPoster_path(query.getString(2));
+            m.setRelease_date(query.getString(4));
+            m.setOverview(query.getString(5));
+            m.setVote_average(query.getString(3));
+/*
+            m.setId(query.getString(1));
+            m.setTitle(query.getString(2));
+            m.setPoster_path(query.getString(3));
+            m.setOverview(query.getString(5));
+            m.setVote_average(query.getString(4));
+*/
+
+
+            movies.add(m);
+        }
+        return movies;
     }
 
     private ArrayList<Movie> ParseMovise(String s) {
@@ -265,12 +310,19 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         Intent intent = new Intent(MainActivity.this, MovieActivity.class);
-        try {
-            intent.putExtra(KEY_OF_SELECTED_MOVIE, jr.get(position).toString());
-            startActivity(intent);
+        intent.putExtra("type", (mfiltertype == 2) ? true : false);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (mfiltertype != 2) {
+            try {
+                intent.putExtra(KEY_OF_SELECTED_MOVIE, jr.get(position).toString());
+                startActivity(intent);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+
+
         }
     }
 

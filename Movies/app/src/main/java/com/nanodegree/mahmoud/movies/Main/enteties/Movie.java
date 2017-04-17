@@ -15,6 +15,10 @@ public class Movie {
         this.overview = overview;
     }
 
+    public Movie() {
+    }
+
+    ;
     String title;
     String poster_path;
     String release_date;
@@ -22,6 +26,30 @@ public class Movie {
 
     String vote_average;
     String overview;
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
+    }
+
+    public void setRelease_date(String release_date) {
+        this.release_date = release_date;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setVote_average(String vote_average) {
+        this.vote_average = vote_average;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
 
     public String getTitle() {
         return title;
