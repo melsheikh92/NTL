@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity implements Mainview, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
+    private static final String KEY_OF_FIRST_VISIBLE_ITEM = "FELEMENT";
     private ProgressBar progressBar;
     GridView gridview;
     com.github.clans.fab.FloatingActionButton fab;
@@ -58,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     String url = "http://api.themoviedb.org/3/movie/popular?api_key=ec298f72dc8c9ad364fda6f08cc2056e";
     LoaderManager loadermanager;
     Loader<ArrayList<Movie>> mloader;
+
+
+    int firstindex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +77,14 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             if (savedInstanceState != null) {
                 if (savedInstanceState.containsKey(KEY_OF_KEEP_FILTERING)) {
                     mfiltertype = savedInstanceState.getInt(KEY_OF_KEEP_FILTERING);
-
+                   // firstindex = savedInstanceState.getInt(KEY_OF_FIRST_VISIBLE_ITEM);
+                    //gridview.onRestoreInstanceState(savedInstanceState.getParcelable("state"));
                 }
 
+            }
+            if (savedInstanceState != null) {
+
+                index = savedInstanceState.getInt("index");
             }
             progressBar = (ProgressBar) findViewById(R.id.progress);
             gridview = (GridView) findViewById(R.id.gridview);
@@ -98,10 +108,11 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 mloader = loadermanager.restartLoader(Movies_Loader_key, b, MainActivity.this);
 
             }
-        }else{
+        } else {
 
             setContentView(R.layout.noconnection_layout);
         }
+
     }
 
     public void filterby(final int filterType) {
@@ -114,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             public void onClick(DialogInterface dialog, int which) {
                 mfiltertype = which;
                 dialog.dismiss();
+                index=0;
                 mloader.forceLoad();
 
             }
@@ -145,9 +157,20 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             protected void onStartLoading() {
                 super.onStartLoading();
                 showProgress();
-                Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
-                forceLoad();
+                //   Toast.makeText(mcontext, "startLoading", Toast.LENGTH_SHORT).show();
 
+
+                if (mMovies != null) {
+                    deliverResult(mMovies);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public void deliverResult(ArrayList<Movie> data) {
+                this.mymovies = data;
+                super.deliverResult(data);
             }
 
             ArrayList<Movie> mymovies;
@@ -157,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mcontext, "background", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(mcontext, "background", Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -285,9 +308,13 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> data) {
-        Toast.makeText(mcontext, "loadfinish", Toast.LENGTH_SHORT).show();
+        //   Toast.makeText(mcontext, "loadfinish", Toast.LENGTH_SHORT).show();
         mMovies = data;
         gridview.setAdapter(new MoviesAdapter(getApplicationContext(), data));
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            gridview.setSelectionFromTop(index,top);
+//        }
+        gridview.setSelection(index);
         hideProgress();
     }
 
@@ -339,9 +366,41 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(KEY_OF_KEEP_FILTERING, mfiltertype);
+        // Toast.makeText(this, "" + gridview.getFirstVisiblePosition(), Toast.LENGTH_SHORT).show();
+
+        int index = gridview.getFirstVisiblePosition();
+        View v = gridview.getChildAt(0);
+        int top = (v == null) ? 0 : (v.getTop() - gridview.getPaddingTop());
+        outState.putInt("index", index);
+        outState.putInt("top", top);
+
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Bundle outState = new Bundle();
+    /*    outState.putInt(KEY_OF_KEEP_FILTERING, mfiltertype);
+
+        int index = gridview.getFirstVisiblePosition();
+        View v = gridview.getChildAt(0);
+        outState.putInt("index", index);*/
+        onSaveInstanceState(outState);
+
+
+    }
+
+    int index;
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+
     }
 
     @Override
