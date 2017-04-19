@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             if (savedInstanceState != null) {
                 if (savedInstanceState.containsKey(KEY_OF_KEEP_FILTERING)) {
                     mfiltertype = savedInstanceState.getInt(KEY_OF_KEEP_FILTERING);
-                   // firstindex = savedInstanceState.getInt(KEY_OF_FIRST_VISIBLE_ITEM);
+                    // firstindex = savedInstanceState.getInt(KEY_OF_FIRST_VISIBLE_ITEM);
                     //gridview.onRestoreInstanceState(savedInstanceState.getParcelable("state"));
                 }
 
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
             public void onClick(DialogInterface dialog, int which) {
                 mfiltertype = which;
                 dialog.dismiss();
-                index=0;
+                index = 0;
                 mloader.forceLoad();
 
             }
@@ -369,13 +369,13 @@ public class MainActivity extends AppCompatActivity implements Mainview, Adapter
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(KEY_OF_KEEP_FILTERING, mfiltertype);
         // Toast.makeText(this, "" + gridview.getFirstVisiblePosition(), Toast.LENGTH_SHORT).show();
-
-        int index = gridview.getFirstVisiblePosition();
-        View v = gridview.getChildAt(0);
-        int top = (v == null) ? 0 : (v.getTop() - gridview.getPaddingTop());
-        outState.putInt("index", index);
-        outState.putInt("top", top);
-
+        if (gridview != null) {
+            int index = gridview.getFirstVisiblePosition();
+            View v = gridview.getChildAt(0);
+            int top = (v == null) ? 0 : (v.getTop() - gridview.getPaddingTop());
+            outState.putInt("index", index);
+            outState.putInt("top", top);
+        }
         super.onSaveInstanceState(outState);
 
     }
